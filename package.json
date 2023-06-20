@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -14,7 +14,9 @@
     "singleQuote": true
   },
   "dependencies": {
+    "@types/lodash": "4.14.195",
     "clsx": "1.2.1",
+    "lodash": "4.17.21",
     "next": "latest",
     "react": "18.2.0",
     "react-dom": "18.2.0",
