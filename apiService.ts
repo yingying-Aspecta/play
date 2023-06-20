@@ -1,4 +1,4 @@
-import Http from './http';
+import Http from './Http';
 
 class ApiService extends Http {
   constructor() {
