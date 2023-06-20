@@ -233,6 +233,12 @@ export default class Http {
           throw response;
         }
 
+        // Debug here, no not handle the res body 
+
+        return '123'
+
+
+
         // sometimes the response is empty
         return response.text().then((responseText) => {
           if (responseText && this.isJson(responseText)) {

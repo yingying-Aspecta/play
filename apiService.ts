@@ -3,13 +3,13 @@ import Http from './http';
 class ApiService extends Http {
   constructor() {
     super({
-      baseURL: 'https://aspecta.id/api/v1',
+      baseURL: 'http://localhost:3000',
     });
   }
 
   getSummary() {
     console.log('test2331')
-    return this.get(`/new/api/home/profile/summary/`, { cache: 'no-store' });
+    return this.get(`/fixtures/data.json`, { cache: 'no-store' });
   }
 }
 
