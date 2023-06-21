@@ -218,40 +218,42 @@ export default class Http {
 
     let timer;
     // do not abort the request if timeout === 0
+    console.log('timeout', timeout)
     if (timeout !== 0) {
       timer = setTimeout(
-        () => abortController.abort('Request timeout'),
+        () => {
+          abortController.abort();
+        },
         timeout,
       );
     }
+    console.log('timer 1', timer)
 
     // await the fetch with a catch in case it's aborted which signals an error
     try {
-      const result = await _fetchPromise.then((response) => {
+      const result = await _fetchPromise.then(async (response) => {
         // throw error if response is not ok
         if (!response.ok) {
           throw response;
         }
 
-        // Debug here, no not handle the res body 
-
-        return '123'
-
-
+        // Debug here, no not handle the res body
 
         // sometimes the response is empty
-        return response.text().then((responseText) => {
+        const a = await response.text().then((responseText) => {
           if (responseText && this.isJson(responseText)) {
             return JSON.parse(responseText);
           }
           return {};
         });
+        return a
       });
       clearTimeout(timer);
       return result;
     } catch (error: any) {
       console.log('💥 Request error URL:', url);
-      timer && clearTimeout(timer);
+      console.log('timer 2', timer)
+      clearTimeout(timer);
       // if (error.status === 401) {
       //   if (!utils.isSSR() && cookieJar.get(cookieJar._auth_token)) {
       //     cookieJar.remove(cookieJar._auth_token);
