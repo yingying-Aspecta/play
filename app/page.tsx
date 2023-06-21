@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 
 export default async function Page() {
-  apiService.setCookie(headers().get('cookie'));
-  const res = await apiService.getSummary();
-  // console.log('res', res);
-  console.log('page')
+  try {
+    apiService.setCookie(headers().get('cookie'));
+    const res = await apiService.getSummary();
+    console.log('success');
+  } catch {
+    console.log('error');
+  }
 
   return (
     <div className="space-y-6">
