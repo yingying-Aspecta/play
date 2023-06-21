@@ -14,8 +14,6 @@ export type TRequestConfig = {
   headers: THeaders;
   data?: any;
   params?: any;
-  signal: AbortSignal;
-  timeout: number;
   cache?: 'force-cache' | 'no-store';
   revalidate?: false | 0 | number;
 };
@@ -26,7 +24,6 @@ type TFetchOptions = {
   body?: any;
   mode: 'cors';
   credentials: 'include';
-  signal: AbortSignal;
   cache?: 'force-cache' | 'no-store';
   next?: { revalidate: false | 0 | number };
 };
@@ -42,7 +39,6 @@ export default class Http {
         'Content-Type': 'application/json',
         ...(config.headers || {}),
       },
-      timeout: 60000, // 60s timeout
     };
   }
 
@@ -142,13 +138,6 @@ export default class Http {
   }
 
   async buildHttpRequest(config: Partial<TRequestConfig>) {
-    // Create the abort controller for timeout handling
-    const abortController = new AbortController();
-    const { signal } = abortController;
-    const timeout =
-      typeof config.timeout !== 'undefined'
-        ? config.timeout
-        : this.defaultRequestConfig.timeout;
 
     let url = config.url || '';
     const method = config.method || 'GET';
@@ -174,7 +163,6 @@ export default class Http {
       },
       mode: 'cors',
       credentials: 'include',
-      signal: config.signal || signal,
     };
 
     // 客户端从cookie中获取token
@@ -213,21 +201,6 @@ export default class Http {
     // Make the fetch request
     const _fetchPromise = fetch(url, fetchOptions);
 
-    // start the timer
-    // if the timer is reached before the fetch is done, abort the fetch
-
-    let timer;
-    // do not abort the request if timeout === 0
-    console.log('timeout', timeout)
-    if (timeout !== 0) {
-      timer = setTimeout(
-        () => {
-          abortController.abort();
-        },
-        timeout,
-      );
-    }
-    console.log('timer 1', timer)
 
     // await the fetch with a catch in case it's aborted which signals an error
     try {
@@ -248,12 +221,9 @@ export default class Http {
         });
         return a
       });
-      clearTimeout(timer);
       return result;
     } catch (error: any) {
-      console.log('💥 Request error URL:', url);
-      console.log('timer 2', timer)
-      clearTimeout(timer);
+      console.log('💥 Request error URL:', url)
       // if (error.status === 401) {
       //   if (!utils.isSSR() && cookieJar.get(cookieJar._auth_token)) {
       //     cookieJar.remove(cookieJar._auth_token);
@@ -266,14 +236,12 @@ export default class Http {
         error.text &&
         typeof error.text == 'function'
       ) {
-        clearTimeout(timer);
 
         // get the response text
         const responseText = await error.text();
 
         // try to decode the response text to json
         if (responseText && this.isJson(responseText)) {
-          clearTimeout(timer);
 
           console.log('💥 Request error(0):', JSON.parse(responseText));
 
@@ -304,7 +272,6 @@ export default class Http {
         throw { message: 'Server error' };
       }
 
-      clearTimeout(timer);
 
       // this is en error object
       // throw to outer catch callback
